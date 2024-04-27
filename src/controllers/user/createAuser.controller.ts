@@ -1,22 +1,23 @@
 import { Request, Response } from 'express';
 import Joi from 'joi';
+import User from '../../models/user.model';
 
 type BodyType = {
   name: string;
   email: string;
-  phone: string;
   password: string;
-  isActive: boolean;
-  role: string;
+  isActive?: boolean;
   dateOfBirth: Date;
-  profileImage: string;
 };
 
 const createAUser = async (req: Request, res: Response) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
   // create a user
-  res.send('User created successfully');
+  const user = new User(req.body);
+  const savedUser = await user.save();
+
+  res.send({ message: 'User created successfully', userId: savedUser._id });
 };
 
 const validate = (data: BodyType): Joi.ValidationResult => {
@@ -29,7 +30,6 @@ const validate = (data: BodyType): Joi.ValidationResult => {
       'any.required': 'Email is required',
       'string.email': 'Email must be a valid email',
     }),
-    phone: Joi.string().messages({}),
     password: Joi.string().min(8).max(1024).required().messages({
       'any.required': 'Password is required',
       'string.min': 'Password must be at least 8 characters',
@@ -38,13 +38,10 @@ const validate = (data: BodyType): Joi.ValidationResult => {
     isActive: Joi.boolean().messages({
       'any.boolean': 'Active must be a boolean',
     }),
-    role: Joi.string().required().messages({
-      'any.required': 'Role is required',
-    }),
+
     dateOfBirth: Joi.date().messages({
       'any.date': 'Date of Birth must be a valid date',
     }),
-    profileImage: Joi.string().messages({}),
   });
   return schema.validate(data);
 };

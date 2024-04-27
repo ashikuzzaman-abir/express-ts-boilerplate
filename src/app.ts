@@ -4,9 +4,9 @@ import cors from 'cors';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import connectDB from './db';
+import moment from 'moment';
 
 import userRoutes from './routes/user.route';
-
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
@@ -21,7 +21,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
-
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the server' });
 });
@@ -30,5 +29,9 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(
+    `Server is running on port ${PORT} at ${moment().format(
+      'MMMM Do YYYY, h:mm:ss a'
+    )}`
+  );
 });
